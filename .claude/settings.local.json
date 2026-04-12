@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:developers-apps-in-toss.toss.im)",
+      "WebFetch(domain:tossmini-docs.toss.im)"
+    ]
+  }
+}

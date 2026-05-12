@@ -15,7 +15,9 @@
 ## 실행 전제
 
 - 프로젝트 루트에서 실행한다.
-- `.env.local`에 아래 값이 들어 있어야 한다.
+- Supabase 값은 아래 둘 중 하나로 제공되어야 한다.
+  - 현재 worktree의 `.env.local`
+  - 같은 git 공용 저장소 루트의 `.env.local` (Codex 새 worktree fallback)
 
 ```bash
 SUPABASE_URL=https://YOUR_PROJECT.supabase.co
@@ -24,6 +26,7 @@ SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE_KEY
 
 - Supabase에는 `reports` 테이블이 생성되어 있어야 한다.
 - 업로드 스크립트는 `scripts/publish-report-to-supabase.mjs`를 사용한다.
+- 스크립트는 fresh worktree에서도 `git rev-parse --git-common-dir` 기준 공용 repo 루트의 `.env.local`을 자동 탐색한다.
 
 ## 자동화 프롬프트
 

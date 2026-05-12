@@ -29,7 +29,7 @@ create index if not exists reports_type_idx on reports (type);
 
 로컬 자동화 또는 로컬 서버에만 아래 값을 둔다. 앱 번들에는 절대 넣지 않는다.
 
-`.env.example`을 참고해 `.env.local`을 만든다.
+`.env.example`을 참고해 `.env.local`을 만든다. Codex가 새 worktree에서 실행되더라도, 퍼블리시 스크립트는 현재 worktree와 git 공용 루트 둘 다에서 `.env.local`을 찾는다.
 
 ```bash
 cp .env.example .env.local

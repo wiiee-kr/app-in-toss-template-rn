@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { execFileSync } from 'node:child_process';
 
 function parseArgs(argv) {
   let reportPath = '';
@@ -63,6 +64,55 @@ async function loadEnvFile(envPath) {
   }
 }
 
+function resolveGitCommonDir() {
+  try {
+    const output = execFileSync('git', ['rev-parse', '--git-common-dir'], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+
+    if (output === '') {
+      return null;
+    }
+
+    return path.resolve(process.cwd(), output);
+  } catch {
+    return null;
+  }
+}
+
+function getDefaultEnvCandidates(explicitEnvPath) {
+  const candidates = [path.resolve(process.cwd(), explicitEnvPath)];
+  const gitCommonDir = resolveGitCommonDir();
+
+  if (gitCommonDir != null) {
+    candidates.push(path.join(path.dirname(gitCommonDir), explicitEnvPath));
+  }
+
+  return [...new Set(candidates)];
+}
+
+async function loadEnvFromCandidates(explicitEnvPath) {
+  const loadedPaths = [];
+
+  for (const candidate of getDefaultEnvCandidates(explicitEnvPath)) {
+    try {
+      await fs.access(candidate);
+      await loadEnvFile(candidate);
+      loadedPaths.push(candidate);
+    } catch (error) {
+      if (error != null && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
+        continue;
+      }
+
+      throw error;
+    }
+  }
+
+  return loadedPaths;
+}
+
 function assertString(value, fieldName) {
   if (typeof value !== 'string' || value.trim() === '') {
     throw new Error(`${fieldName} 값이 비어 있습니다.`);
@@ -106,7 +156,7 @@ function validateReport(report) {
 
 async function main() {
   const { reportPath, dryRun, envPath } = parseArgs(process.argv.slice(2));
-  await loadEnvFile(envPath);
+  const loadedEnvPaths = await loadEnvFromCandidates(envPath);
 
   const absoluteReportPath = path.resolve(reportPath);
   const report = JSON.parse(await fs.readFile(absoluteReportPath, 'utf8'));
@@ -140,7 +190,10 @@ async function main() {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ?? '';
 
   if (url === '' || serviceRoleKey === '') {
-    throw new Error('SUPABASE_URL 또는 SUPABASE_SERVICE_ROLE_KEY가 설정되지 않았습니다.');
+    const searchedPaths = getDefaultEnvCandidates(envPath).join(', ');
+    throw new Error(
+      `SUPABASE_URL 또는 SUPABASE_SERVICE_ROLE_KEY가 설정되지 않았습니다. 확인한 env 경로: ${searchedPaths}. 로드된 env 경로: ${loadedEnvPaths.join(', ') || '없음'}`
+    );
   }
 
   const endpoint = `${url.replace(/\/$/u, '')}/rest/v1/reports?on_conflict=id`;

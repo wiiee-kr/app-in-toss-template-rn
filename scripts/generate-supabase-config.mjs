@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { execFileSync } from 'node:child_process';
 
 async function loadEnvFile(envPath) {
   try {
@@ -32,10 +33,49 @@ async function loadEnvFile(envPath) {
   }
 }
 
+function resolveGitCommonDir() {
+  try {
+    const output = execFileSync('git', ['rev-parse', '--git-common-dir'], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+
+    if (output === '') {
+      return null;
+    }
+
+    return path.resolve(process.cwd(), output);
+  } catch {
+    return null;
+  }
+}
+
+function getEnvCandidates(root) {
+  const candidates = [path.join(root, '.env.local')];
+  const gitCommonDir = resolveGitCommonDir();
+
+  if (gitCommonDir != null) {
+    candidates.push(path.join(path.dirname(gitCommonDir), '.env.local'));
+  }
+
+  return [...new Set(candidates)];
+}
+
+async function loadMergedEnv(root) {
+  const mergedEnv = {};
+
+  for (const candidate of getEnvCandidates(root)) {
+    Object.assign(mergedEnv, await loadEnvFile(candidate));
+  }
+
+  return mergedEnv;
+}
+
 async function main() {
   const root = process.cwd();
   const env = {
-    ...(await loadEnvFile(path.join(root, '.env.local'))),
+    ...(await loadMergedEnv(root)),
     ...process.env,
   };
 

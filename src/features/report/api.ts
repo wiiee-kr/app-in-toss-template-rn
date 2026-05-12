@@ -4,6 +4,7 @@ import type { Report } from './types';
 
 interface ReportRow {
   payload: unknown;
+  published_at: string;
 }
 
 export type TodayReportResult =
@@ -38,7 +39,12 @@ export async function fetchTodayReport(): Promise<TodayReportResult> {
     }
 
     const rows = JSON.parse(responseText) as ReportRow[];
-    const report = rows[0]?.payload;
+    const row = rows[0];
+    if (row == null) {
+      return { status: 'not-published' };
+    }
+
+    const report = row.payload;
 
     if (report == null) {
       return { status: 'not-published' };
@@ -51,7 +57,13 @@ export async function fetchTodayReport(): Promise<TodayReportResult> {
       };
     }
 
-    return { status: 'ready', report };
+    return {
+      status: 'ready',
+      report: {
+        ...report,
+        publishedAtLabel: formatKoreaPublishedAt(row.published_at),
+      },
+    };
   } catch {
     return {
       status: 'error',
@@ -63,7 +75,7 @@ export async function fetchTodayReport(): Promise<TodayReportResult> {
 function buildReportsEndpoint(date: string) {
   const baseUrl = supabaseConfig.url.replace(/\/$/, '');
   const query = new URLSearchParams({
-    select: 'payload',
+    select: 'payload,published_at',
     date: `eq.${date}`,
     order: 'published_at.desc',
     limit: '1',
@@ -72,7 +84,26 @@ function buildReportsEndpoint(date: string) {
   return `${baseUrl}/rest/v1/reports?${query.toString()}`;
 }
 
-function getKoreaDateString() {
+function formatKoreaPublishedAt(value: string) {
+  const publishedAt = new Date(value);
+
+  if (Number.isNaN(publishedAt.getTime())) {
+    return '업데이트 시간 확인 중';
+  }
+
+  const date = getKoreaDateString(publishedAt);
+  const today = getKoreaDateString();
+  const time = new Intl.DateTimeFormat('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(publishedAt);
+
+  return date === today ? `오늘 ${time} 업데이트` : `${date} ${time} 업데이트`;
+}
+
+function getKoreaDateString(date = new Date()) {
   const formatter = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Seoul',
     year: 'numeric',
@@ -80,7 +111,7 @@ function getKoreaDateString() {
     day: '2-digit',
   });
 
-  return formatter.format(new Date());
+  return formatter.format(date);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

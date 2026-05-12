@@ -1,3 +1,5 @@
+<!-- 해당 문서로 codex 자동화 실행하면 됩니다. -->
+
 # Codex 자동화 실행 프롬프트
 
 이 문서는 Codex 자동화가 매일 시장 리서치를 생성하고, 앱용 JSON으로 정리한 뒤, Supabase 업로드 스크립트까지 실행할 때 사용하는 최종 프롬프트다.
@@ -208,7 +210,7 @@ npm run publish:report -- data/latest-report.json
 종목 분류표는 내부적으로 아래 형태를 따른다.
 
 | 구분 | 종목/섹터 | 국가 | 현재 흐름 | 기대 요인 | 리스크 | 관찰 의견 |
-|---|---|---|---|---|---|---|
+| ---- | --------- | ---- | --------- | --------- | ------ | --------- |
 
 ## 7. 앱 JSON 출력 규칙
 
@@ -218,50 +220,50 @@ JSON 외 문장은 파일에 넣지 않는다.
 필수 스키마:
 
 {
-  "id": "YYYY-MM-DD-daily-pre-market",
-  "date": "YYYY-MM-DD",
-  "type": "daily_pre_market",
-  "publishedAt": "YYYY-MM-DDT08:40:00+09:00",
-  "publishedAtLabel": "오늘 08:40 업데이트",
-  "marketTemperature": "공격 | 중립 | 보수 | 관망",
-  "marketTemperatureReason": "",
-  "oneLineConclusion": "",
-  "confidence": "high | medium | low",
-  "top3": [
-    {
-      "id": "",
-      "name": "",
-      "country": "KR | US | GLOBAL",
-      "category": "한국 | 미국 | 섹터 | ETF | 거시",
-      "reason": "",
-      "risk": "",
-      "confidence": "high | medium | low"
-    }
-  ],
-  "koreaSummary": [
-    {
-      "id": "",
-      "label": "수급 | 섹터 | 주의 | 환율 | 지수",
-      "value": "",
-      "tone": "positive | neutral | caution"
-    }
-  ],
-  "usSummary": [
-    {
-      "id": "",
-      "label": "기술주 | 금리 | 유가 | 지수 | 실적",
-      "value": "",
-      "tone": "positive | neutral | caution"
-    }
-  ],
-  "risks": [""],
-  "checkpoints": [""],
-  "weekendNotice": "주말과 주요 휴장일에는 신규 장전 리포트가 발행되지 않을 수 있어요. 대신 다음 거래일을 준비하는 체크포인트를 정리해드려요.",
-  "disclaimer": "이 리포트는 투자 판단 참고용 리서치이며, 특정 종목의 매수·매도 권유가 아닙니다. 모든 투자의 최종 판단과 책임은 투자자 본인에게 있습니다.",
-  "feedback": {
-    "helpful": 0,
-    "unclear": 0
-  }
+"id": "YYYY-MM-DD-daily-pre-market",
+"date": "YYYY-MM-DD",
+"type": "daily_pre_market",
+"publishedAt": "YYYY-MM-DDT08:40:00+09:00",
+"publishedAtLabel": "오늘 08:40 업데이트",
+"marketTemperature": "공격 | 중립 | 보수 | 관망",
+"marketTemperatureReason": "",
+"oneLineConclusion": "",
+"confidence": "high | medium | low",
+"top3": [
+{
+"id": "",
+"name": "",
+"country": "KR | US | GLOBAL",
+"category": "한국 | 미국 | 섹터 | ETF | 거시",
+"reason": "",
+"risk": "",
+"confidence": "high | medium | low"
+}
+],
+"koreaSummary": [
+{
+"id": "",
+"label": "수급 | 섹터 | 주의 | 환율 | 지수",
+"value": "",
+"tone": "positive | neutral | caution"
+}
+],
+"usSummary": [
+{
+"id": "",
+"label": "기술주 | 금리 | 유가 | 지수 | 실적",
+"value": "",
+"tone": "positive | neutral | caution"
+}
+],
+"risks": [""],
+"checkpoints": [""],
+"weekendNotice": "주말과 주요 휴장일에는 신규 장전 리포트가 발행되지 않을 수 있어요. 대신 다음 거래일을 준비하는 체크포인트를 정리해드려요.",
+"disclaimer": "이 리포트는 투자 판단 참고용 리서치이며, 특정 종목의 매수·매도 권유가 아닙니다. 모든 투자의 최종 판단과 책임은 투자자 본인에게 있습니다.",
+"feedback": {
+"helpful": 0,
+"unclear": 0
+}
 }
 
 ## 8. JSON 작성 세부 규칙
@@ -315,4 +317,3 @@ dry-run이 실패하면 Supabase 업로드를 실행하지 말고, 실패 원인
 node scripts/publish-report-to-supabase.mjs data/report.sample.json --dry-run
 npm run publish:report -- data/report.sample.json
 ```
-

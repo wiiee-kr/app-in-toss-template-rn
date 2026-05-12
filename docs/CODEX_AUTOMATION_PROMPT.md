@@ -15,15 +15,15 @@
 ## 실행 전제
 
 - 프로젝트 루트에서 실행한다.
-- `.env.local`에 아래 값이 들어 있어야 한다.
+- `local_scripts/supabase-report.mjs` 상단 `SUPABASE_CONFIG`에 아래 값이 들어 있어야 한다.
 
-```bash
-SUPABASE_URL=https://YOUR_PROJECT.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE_KEY
+```js
+url: 'https://YOUR_PROJECT.supabase.co',
+serviceRoleKey: 'YOUR_SERVICE_ROLE_KEY',
 ```
 
 - Supabase에는 `reports` 테이블이 생성되어 있어야 한다.
-- 업로드 스크립트는 `scripts/publish-report-to-supabase.mjs`를 사용한다.
+- 업로드 스크립트는 `local_scripts/supabase-report.mjs`를 사용한다.
 
 ## 자동화 프롬프트
 
@@ -52,7 +52,7 @@ SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE_KEY
 6. 저장 후 아래 명령어로 dry-run 검증을 실행한다.
 
 ```bash
-node scripts/publish-report-to-supabase.mjs data/latest-report.json --dry-run
+npm run publish:report -- data/latest-report.json --dry-run
 ```
 
 7. dry-run이 성공하면 아래 명령어를 실행해 Supabase에 저장한다.
@@ -230,7 +230,7 @@ JSON 외 문장은 파일에 넣지 않는다.
 "date": "YYYY-MM-DD",
 "type": "daily_pre_market",
 "publishedAt": "YYYY-MM-DDT08:40:00+09:00",
-"publishedAtLabel": "오늘 08:40 업데이트",
+"publishedAtLabel": "오늘 08:40 업데이트(근데 현재시간으로 나타내기)",
 "marketTemperature": "공격 | 중립 | 보수 | 관망",
 "marketTemperatureReason": "",
 "oneLineConclusion": "",
@@ -307,7 +307,7 @@ JSON 외 문장은 파일에 넣지 않는다.
 JSON 저장 후 반드시 아래 명령을 실행한다.
 
 ```bash
-node scripts/publish-report-to-supabase.mjs data/latest-report.json --dry-run
+npm run publish:report -- data/latest-report.json --dry-run
 ```
 
 dry-run이 성공하면 반드시 아래 명령을 실행한다.
@@ -324,6 +324,6 @@ dry-run이 실패하면 Supabase 업로드를 실행하지 말고, 실패 원인
 자동화 없이 직접 테스트할 때는 아래 순서로 실행한다.
 
 ```bash
-node scripts/publish-report-to-supabase.mjs data/report.sample.json --dry-run
-npm run publish:report -- data/report.sample.json
+npm run publish:report -- local_scripts/report.sample.json --dry-run
+npm run publish:report -- local_scripts/report.sample.json
 ```

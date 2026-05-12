@@ -25,44 +25,34 @@ create index if not exists reports_date_idx on reports (date desc);
 create index if not exists reports_type_idx on reports (type);
 ```
 
-## 2. 환경변수 또는 .env 파일
+## 2. 로컬 스크립트 변수 설정
 
 로컬 자동화 또는 로컬 서버에만 아래 값을 둔다. 앱 번들에는 절대 넣지 않는다.
 
-`.env.example`을 참고해 `.env.local`을 만든다.
+`local_scripts/supabase-report.mjs` 상단의 `SUPABASE_CONFIG` 값을 채운다.
 
-```bash
-cp .env.example .env.local
+```js
+const SUPABASE_CONFIG = {
+  url: 'https://YOUR_PROJECT.supabase.co',
+  anonKey: 'YOUR_ANON_KEY',
+  serviceRoleKey: 'YOUR_SERVICE_ROLE_KEY',
+  reportsTable: 'reports',
+  generatedConfigOutputPath: 'src/config/supabase.generated.ts',
+};
 ```
 
-`.env.local`:
+`serviceRoleKey`는 자동화 업로드용이다. 앱에는 넣지 않는다.
 
-```bash
-SUPABASE_URL=https://YOUR_PROJECT.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE_KEY
-SUPABASE_ANON_KEY=YOUR_ANON_KEY
-```
-
-`SUPABASE_SERVICE_ROLE_KEY`는 자동화 업로드용이다. 앱에는 넣지 않는다.
-
-`SUPABASE_ANON_KEY`는 앱의 공개 읽기용 키다. 앱에서 직접 읽을 수 있도록 아래 명령이 `.env.local` 값을 `src/config/supabase.generated.ts`로 생성한다. 생성 파일은 gitignore에 들어가므로 커밋하지 않는다.
+`anonKey`는 앱의 공개 읽기용 키다. 앱에서 직접 읽을 수 있도록 아래 명령이 `SUPABASE_CONFIG` 값을 `src/config/supabase.generated.ts`로 생성한다. 생성 파일은 gitignore에 들어가므로 커밋하지 않는다.
 
 ```bash
 npm run generate:supabase-config
 ```
 
-환경변수로 직접 넣어도 된다.
-
-```bash
-SUPABASE_URL="https://YOUR_PROJECT.supabase.co" \
-SUPABASE_SERVICE_ROLE_KEY="YOUR_SERVICE_ROLE_KEY" \
-npm run publish:report -- data/report.sample.json
-```
-
 ## 3. 리포트 발행
 
 ```bash
-node scripts/publish-report-to-supabase.mjs data/report.sample.json
+npm run publish:report -- local_scripts/report.sample.json
 ```
 
 실제 자동화에서는 `data/report.sample.json` 대신 Codex가 생성한 JSON 파일 경로를 넘긴다.
@@ -76,13 +66,7 @@ npm run publish:report -- data/latest-report.json
 키 없이 저장 형태만 확인하려면 dry run을 사용한다.
 
 ```bash
-node scripts/publish-report-to-supabase.mjs data/report.sample.json --dry-run
-```
-
-다른 env 파일을 쓰려면:
-
-```bash
-node scripts/publish-report-to-supabase.mjs data/report.sample.json --env .env.production
+npm run publish:report -- local_scripts/report.sample.json --dry-run
 ```
 
 ## 4. 저장 방식

@@ -6,7 +6,7 @@ import pluginReact from 'eslint-plugin-react';
 export default [
   { ignores: ['**/node_modules/**', '**/dist/**', '**/.granite/**', '*.{cjs,js}'] },
   {
-    files: ['scripts/**/*.mjs'],
+    files: ['local_scripts/**/*.mjs'],
     languageOptions: {
       globals: {
         console: 'readonly',

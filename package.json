@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "granite dev",
     "build": "ait build",
-    "generate:supabase-config": "node scripts/generate-supabase-config.mjs",
+    "generate:supabase-config": "node local_scripts/supabase-report.mjs generate-config",
     "predev": "npm run generate:supabase-config",
     "pretypecheck": "npm run generate:supabase-config",
     "prelint": "npm run generate:supabase-config",
@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "deploy": "ait deploy",
-    "publish:report": "node scripts/publish-report-to-supabase.mjs"
+    "publish:report": "node local_scripts/supabase-report.mjs publish"
   },
   "dependencies": {
     "@apps-in-toss/framework": "^2.4.1",
